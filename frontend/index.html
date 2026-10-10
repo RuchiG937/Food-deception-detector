@@ -31,15 +31,35 @@
             </label>
           </div>
         </div>
-
+        
         <div class="upload-box" id="dropArea">
-          <input type="file" id="imageInput" accept="image/*" multiple hidden>
+          <input type="file" id="imageInput" accept="image/*" capture="environment" multiple hidden>
           <div id="uploadPlaceholder">
             <p class="upload-icon">📸</p>
             <p><strong>Click to upload or snap label photo</strong></p>
             <small>Front & Back panels (Select multiple)</small>
           </div>
           <img id="imagePreview" alt="Label Preview" class="preview-img hidden">
+        </div>
+
+        <!-- Advanced Live Camera Trigger Button -->
+        <div class="input-group" style="margin-top: 10px;">
+          <button type="button" id="openCameraButton" class="primary-btn" style="background-color: #2563eb;">
+            📷 Open Live Camera
+          </button>
+
+          <!-- Live Camera Viewfinder (Hidden by default) -->
+          <div id="cameraContainer" class="hidden" style="margin-top: 10px; text-align: center; background: #000; border-radius: 8px; overflow: hidden; padding: 10px;">
+            <video id="videoElement" width="100%" autoplay playsinline style="max-height: 250px; object-fit: contain; border-radius: 4px;"></video>
+            <button type="button" id="snapButton" class="primary-btn" style="background-color: #dc2626; margin-top: 8px;">
+              📸 Take Snapshot
+            </button>
+            <button type="button" id="closeCameraButton" class="primary-btn" style="background-color: #4b5563; margin-top: 4px; font-size: 0.85rem; padding: 6px;">
+              Close Camera
+            </button>
+          </div>
+          <!-- Hidden canvas for capturing frame -->
+          <canvas id="canvasElement" style="display: none;"></canvas>
         </div>
 
         <!-- Diet Goal Selector Update -->
@@ -61,7 +81,7 @@
           <label for="frontClaim">Front Marketing Claim (Optional):</label>
           <input type="text" id="frontClaim" placeholder="e.g. 100% Real, Zero Added Sugar" class="text-input">
         </div>
-
+        
         <!-- Health Profiles Update -->
         <div class="input-group">
           <label class="section-label">Health Risk Profiles:</label>
@@ -87,7 +107,7 @@
           <div class="spinner"></div>
           <p>Analyzing label with Gemma 4 & computing clean swaps...</p>
         </div>
-
+        
         <div id="emptyState" class="empty-state">
           <p>Upload a product label to get plain-language ingredient explanations, sugar/sodium metrics, and verified healthy swaps.</p>
         </div>

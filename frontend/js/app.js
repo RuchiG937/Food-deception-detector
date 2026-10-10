@@ -20,6 +20,16 @@ const loaderText = loader ? loader.querySelector("p") : null;
 const emptyState = document.getElementById("emptyState");
 const resultContent = document.getElementById("resultContent");
 
+// Camera Elements
+const openCameraButton = document.getElementById("openCameraButton");
+const cameraContainer = document.getElementById("cameraContainer");
+const videoElement = document.getElementById("videoElement");
+const snapButton = document.getElementById("snapButton");
+const closeCameraButton = document.getElementById("closeCameraButton");
+const canvasElement = document.getElementById("canvasElement");
+
+let mediaStream = null;
+
 // Custom Input Elements
 const dietGoalDropdown = document.getElementById("dietGoal");
 const customDietInput = document.getElementById("customDietInput");
@@ -101,6 +111,59 @@ function handleFile(file) {
   reader.readAsDataURL(file);
 }
 
+// ---------- Live Camera Logic ----------
+if (openCameraButton) {
+  openCameraButton.addEventListener("click", async () => {
+    cameraContainer.classList.remove("hidden");
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment" } 
+      });
+      videoElement.srcObject = mediaStream;
+    } catch (err) {
+      alert("Camera access denied or not supported on this browser!");
+      console.error(err);
+      cameraContainer.classList.add("hidden");
+    }
+  });
+}
+
+if (closeCameraButton) {
+  closeCameraButton.addEventListener("click", () => {
+    stopCamera();
+  });
+}
+
+if (snapButton) {
+  snapButton.addEventListener("click", () => {
+    if (!mediaStream) return;
+
+    canvasElement.width = videoElement.videoWidth || 640;
+    canvasElement.height = videoElement.videoHeight || 480;
+    const ctx = canvasElement.getContext("2d");
+    ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+    canvasElement.toBlob((blob) => {
+      const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
+      handleFile(file);
+      stopCamera();
+    }, "image/jpeg");
+  });
+}
+
+function stopCamera() {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(track => track.stop());
+    mediaStream = null;
+  }
+  if (videoElement) {
+    videoElement.srcObject = null;
+  }
+  if (cameraContainer) {
+    cameraContainer.classList.add("hidden");
+  }
+}
+
 // Toggle Custom Diet Input
 if (dietGoalDropdown) {
   dietGoalDropdown.addEventListener("change", (e) => {
@@ -131,7 +194,6 @@ function closeModal() {
 }
 
 function openOfflineCard(name, price, taste) {
-  // textContent is already safe (no HTML is parsed)
   modalProductName.textContent = name;
   modalPrice.textContent = price || "₹35 - ₹50 (Approx)";
   modalTaste.textContent = taste || "Wholesome & Healthy";
@@ -147,13 +209,10 @@ window.addEventListener("click", (e) => {
   if (e.target === offlineModal) closeModal();
 });
 
-// Close popup with the Escape key
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !offlineModal.classList.contains("hidden")) closeModal();
 });
 
-// Event delegation: handles "Offline Store Guide" buttons created dynamically.
-// Uses data-attributes instead of inline onclick, so quotes in names can't break anything.
 resultContent.addEventListener("click", (e) => {
   const btn = e.target.closest(".btn-offline");
   if (!btn) return;
@@ -172,13 +231,11 @@ analyzeBtn.addEventListener("click", async () => {
   const intent = document.querySelector('input[name="userIntent"]:checked').value;
   const frontClaim = document.getElementById("frontClaim").value.trim();
 
-  // Extract Diet Goal (Handle Custom)
   let dietGoal = dietGoalDropdown.value;
   if (dietGoal === "Custom") {
     dietGoal = customDietInput.value.trim() || "General Health";
   }
 
-  // Extract Health Profiles (Handle Custom)
   const selectedProfiles = Array.from(document.querySelectorAll('input[name="healthProfile"]:checked'))
     .map(cb => cb.value);
 
@@ -188,13 +245,12 @@ analyzeBtn.addEventListener("click", async () => {
   const profilesString = selectedProfiles.join(", ");
 
   const formData = new FormData();
-  formData.append("image", selectedFile); // 'files' ko wapas 'image' kar diya
+  formData.append("image", selectedFile);
   formData.append("health_profiles", profilesString);
   formData.append("front_claim", frontClaim);
   formData.append("diet_goal", dietGoal);
   formData.append("intent", intent);
 
-  // UI: loading state (button disabled so double-click can't send two requests)
   analyzeBtn.disabled = true;
   analyzeBtn.style.opacity = "0.6";
   analyzeBtn.style.cursor = "not-allowed";
@@ -203,12 +259,10 @@ analyzeBtn.addEventListener("click", async () => {
   emptyState.classList.add("hidden");
   resultContent.classList.add("hidden");
 
-  // Message if the free server is waking up
   const slowTimer = setTimeout(() => {
     setLoaderText("Server is waking up, this can take up to a minute on the first request. Please wait...");
   }, SLOW_NOTICE_MS);
 
-  // Timeout so the app never hangs forever
   const controller = new AbortController();
   const abortTimer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -226,9 +280,7 @@ analyzeBtn.addEventListener("click", async () => {
         if (err && err.detail) {
           message = typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail);
         }
-      } catch (_) {
-        // Response was not JSON, keep the default message
-      }
+      } catch (_) {}
       throw new Error(message);
     }
 
@@ -263,7 +315,6 @@ function renderOutput(data) {
   const intentMode = isPrePurchase ? "🛒 Market Decision Mode" : "🏠 Zero-Waste Pantry Rescue";
   const productName = data.product_name || "Unknown Product";
 
-  // Top Title & Deception Score
   const headerHtml = `
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.8rem; margin-bottom: 1rem;">
       <div>
@@ -274,7 +325,6 @@ function renderOutput(data) {
     </div>
   `;
 
-  // Sugar & Salt Conversions
   const metrics = data.sugar_salt_metrics || {};
   const metricsHtml = `
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-bottom:1rem;">
@@ -289,7 +339,6 @@ function renderOutput(data) {
     </div>
   `;
 
-  // Jargon Buster
   let jargonList = "";
   if (Array.isArray(data.plain_language_breakdown) && data.plain_language_breakdown.length > 0) {
     jargonList = data.plain_language_breakdown.map(item => `
@@ -301,7 +350,6 @@ function renderOutput(data) {
     `).join("");
   }
 
-  // Buying vs Pantry Advice Context
   let contextualHtml = "";
   if (isPrePurchase) {
     contextualHtml = `
@@ -323,9 +371,6 @@ function renderOutput(data) {
     `;
   }
 
-  // ==========================================
-  // Optimal Product Match OR Alternative Swaps
-  // ==========================================
   let swapsHtml = "";
 
   if (data.is_product_optimal) {
@@ -390,7 +435,6 @@ function renderOutput(data) {
     `;
   }
 
-  // Combine everything and display
   resultContent.innerHTML = headerHtml + metricsHtml + jargonList + contextualHtml + swapsHtml;
   resultContent.classList.remove("hidden");
 }
