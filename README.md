@@ -22,11 +22,13 @@ Modern packaged foods are filled with deceptive marketing. Brands highlight clai
 * **Deployment (Target):** Render
 
 ## ✨ Key Features
+* **Smart Health Swaps:** Analyzes user-specific factors (like Diabetic, PCOS profiles, and Diet Goals) to recommend the most optimal, healthy alternative for any deceptive food item.
+* **Direct E-Commerce Integration:** Provides direct purchase links to popular online platforms (like Blinkit, Zepto, or Instamart), allowing users to instantly buy the recommended healthy swaps.
 * **Single-Image Vision Audit:** Optimized, memory-safe single-image processing tailored for fast mobile and web scanning.
 * **Strict AI JSON Output:** Engineered prompt architecture ensuring reliable macro-nutrient extraction and categorical consistency.
 * **Intelligent Category Mapping:** Custom backend routing that accurately translates local Indian food categories (e.g., Paneer, Dairy) into global API-friendly queries.
 * **Resilient Architecture:** Fallback recommendation database triggers automatically if the primary external API fails or lacks localized data.
-* **Zero-Waste Hacks:** Provides damage-control pairings and portion guidance for products already sitting in the user's pantry.
+* **Zero-Waste Hacks:** Provides damage-control pairings and portion guidance for products already sitting in the user's pantry.  
 
 ## 🛠️ Local Setup & Installation
 
