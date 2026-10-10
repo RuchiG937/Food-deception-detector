@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Farmley Roasted Peri Peri Makhana",
+    "category": "Snacks / Chips",
+    "approx_price": "₹45 per 50g",
+    "taste_profile": "Spiced & Crunchy",
+    "health_score": 93,
+    "features": [380, 10.0, 1.0, 8.0],
+    "target_goals": ["Fat Loss / Calorie Deficit", "General Health", "Heart Health / Low Sodium"],
+    "why": "Roasted with zero palm oil. High satiety index and delivers the same crunch with 60% lower glycemic impact compared to fried potato chips."
+  },
+  {
+    "name": "The Whole Truth Spiced Roasted Chana Crisps",
+    "category": "Snacks / Chips",
+    "approx_price": "₹40 per 60g",
+    "taste_profile": "Savory, Roasted Crunch",
+    "health_score": 90,
+    "features": [390, 18.0, 2.0, 7.0],
+    "target_goals": ["Muscle Gain / High Protein", "Fat Loss / Calorie Deficit"],
+    "why": "High plant protein and complex dietary fiber with slow glucose release. Perfect swap for refined flour namkeen."
+  },
+  {
+    "name": "Raw Pressery Cold Pressed Coconut Water",
+    "category": "Beverage",
+    "approx_price": "₹60 per 250ml",
+    "taste_profile": "Naturally Sweet & Light",
+    "health_score": 96,
+    "features": [45, 1.0, 5.0, 0.5],
+    "target_goals": ["General Health", "Heart Health / Low Sodium", "Fat Loss / Calorie Deficit"],
+    "why": "Zero added sugar, zero synthetic caramel color, and rich in bioavailable potassium. Best swap for carbonated sodas."
+  },
+  {
+    "name": "Amul Masala Buttermilk (Chaas)",
+    "category": "Beverage",
+    "approx_price": "₹15 per 200ml",
+    "taste_profile": "Salty, Spiced & Refreshing",
+    "health_score": 94,
+    "features": [30, 2.0, 0.0, 1.5],
+    "target_goals": ["General Health", "Fat Loss / Calorie Deficit", "Diabetic"],
+    "why": "Natural probiotics for gut health, zero sugar, and hydrating. Excellent alternative to sugary fruit juices."
+  },
+  {
+    "name": "Slurrp Farm No Maida Millet Noodles",
+    "category": "Noodles / Pasta",
+    "approx_price": "₹65 per 150g",
+    "taste_profile": "Earthy & Chewy",
+    "health_score": 88,
+    "features": [350, 12.0, 2.0, 3.0],
+    "target_goals": ["General Health", "Kids Safe", "Diabetic"],
+    "why": "Made from whole millets and whole wheat without any refined flour (maida) or wax coating. Tastemaker has no MSG."
+  },
+  {
+    "name": "True Elements Millet Cookies",
+    "category": "Biscuits / Cookies",
+    "approx_price": "₹120 per 150g",
+    "taste_profile": "Crumbly & Mildly Sweet",
+    "health_score": 85,
+    "features": [480, 8.0, 12.0, 22.0],
+    "target_goals": ["General Health", "Kids Safe"],
+    "why": "Sweetened with jaggery instead of refined sugar, and baked with butter/ghee instead of hydrogenated palm oil."
+  },
+  {
+    "name": "100% Whole Wheat Sourdough Bread",
+    "category": "Bakery",
+    "approx_price": "₹80 per loaf",
+    "taste_profile": "Earthy & Chewy with a mild tang",
+    "health_score": 88,
+    "features": [250, 11.0, 2.0, 2.0],
+    "target_goals": ["General Health", "Fat Loss / Calorie Deficit", "Diabetic"],
+    "why": "Fermented naturally, which breaks down gluten and lowers the glycemic index. Zero chemical dough conditioners."
+  },
+  {
+    "name": "Amul 99% Cacao Dark Chocolate",
+    "category": "Sweets",
+    "approx_price": "₹150 per 120g",
+    "taste_profile": "Intense Bitter & Rich",
+    "health_score": 85,
+    "features": [590, 14.0, 1.0, 50.0],
+    "target_goals": ["Keto / Low Carb", "General Health", "Diabetic"],
+    "why": "Zero added sugar. Rich in antioxidants and flavonoids compared to commercial milk chocolates loaded with sugar."
+  },
+  {
+    "name": "Orchard Lane No Sugar Tomato Ketchup",
+    "category": "Condiments",
+    "approx_price": "₹220 per 250g",
+    "taste_profile": "Tangy & Naturally Sweet",
+    "health_score": 92,
+    "features": [40, 1.0, 4.0, 0.0],
+    "target_goals": ["General Health", "Fat Loss / Calorie Deficit", "Diabetic"],
+    "why": "Sweetened with natural apple puree instead of high fructose corn syrup or refined white sugar."
+  },
+  {
+    "name": "True Elements Rolled Oats",
+    "category": "Cereal",
+    "approx_price": "₹150 per 500g",
+    "taste_profile": "Neutral, Chewy",
+    "health_score": 95,
+    "features": [389, 13.0, 0.0, 6.5],
+    "target_goals": ["General Health", "Heart Health / Low Sodium", "Fat Loss / Calorie Deficit", "Muscle Gain / High Protein"],
+    "why": "100% whole grain, zero preservatives, high in beta-glucan fiber. Best swap for sugar-coated breakfast cereals."
+  }
+]

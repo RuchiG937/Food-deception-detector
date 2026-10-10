@@ -1,81 +1,108 @@
 import io
-from app.gemma_client import audit_food_label
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+import logging
+from typing import List
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
+from PIL import Image, ImageOps
 
-app = FastAPI(
-    title="CleanLabel AI - Food Deception Detector API",
-    version="1.0.0",
-    description="Multimodal Food Safety Auditor powered by Gemma 4",
-)
+from app.gemma_client import audit_food_label
+from app.recommender import find_smart_swaps
 
+logger = logging.getLogger("cleanlabel.api")
 
-# ---- Rate limiter setup ----
-def get_real_ip(request: Request):
-  forwarded = request.headers.get("x-forwarded-for")
-  if forwarded:
-    return forwarded.split(",")[0].strip()
-  return request.client.host if request.client else "127.0.0.1"
+MAX_IMAGE_BYTES = 8 * 1024 * 1024  # 8 MB (same limit as the frontend)
+MAX_IMAGE_SIDE = 1600              # big phone photos are shrunk before sending to AI
+VALID_INTENTS = {"pre_purchase", "post_purchase"}
 
+app = FastAPI(title="CleanLabel AI Backend", version="1.2.0")
 
-limiter = Limiter(key_func=get_real_ip)
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-# ----------------------------
-
-# Allow CORS for local development and Vercel production frontend
+# No cookies/logins are used, so credentials are not needed.
+# (Wildcard origin together with credentials is an unsafe combination.)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5500",
-        "http://127.0.0.1:5500",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://*.vercel.app",  # All vercel preview/prod links
-        "*",  # Local testing smooth rakhne ke liye abhi '*' safe hai
-    ],
+    allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
 @app.get("/")
-def health_check():
-  return {"status": "online", "service": "CleanLabel Backend"}
+def read_root():
+    return {"message": "CleanLabel AI API running with Gemma 4"}
 
+
+@app.get("/health")
+def health():
+    # Lightweight endpoint, useful to wake up a sleeping free server
+    return {"status": "ok"}
+
+
+def _load_image(image_bytes: bytes) -> Image.Image:
+    img = Image.open(io.BytesIO(image_bytes))
+    img = ImageOps.exif_transpose(img)  # fixes sideways phone photos
+    img = img.convert("RGB")
+    img.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE))
+    return img
 
 @app.post("/api/audit")
-@limiter.limit("60/hour")  # Demo ke waqt fail na ho isliye balanced rakha
-async def audit_endpoint(
-    request: Request,
-    image: UploadFile = File(...),
-    health_profiles: str = Form(default="General Public"),
-    front_claim: str = Form(default=""),
+async def audit_label_endpoint(
+    image: UploadFile = File(...),  # Wapas 'image' set kar diya
+    health_profiles: str = Form(""),
+    front_claim: str = Form(""),
+    diet_goal: str = Form("General Health"),
+    intent: str = Form("pre_purchase"),
 ):
-  if not image.content_type.startswith("image/"):
-    raise HTTPException(
-        status_code=400, detail="Uploaded file must be a valid image."
-    )
+    # ---- Validate & read image ----
+    if image.content_type and not image.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Please upload an image file.")
 
-  try:
-    image_bytes = await image.read()
+    image_bytes = await image.read(MAX_IMAGE_BYTES + 1)
+    if len(image_bytes) > MAX_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="Image is too large (max 8 MB).")
 
-    # 5 MB payload limit
-    if len(image_bytes) > 5 * 1024 * 1024:
-      raise HTTPException(status_code=413, detail="Image too large (max 5 MB).")
+    try:
+        pil_image = _load_image(image_bytes)
+    except Exception:
+        logger.exception("Could not read uploaded image")
+        raise HTTPException(status_code=400, detail="Invalid image file.")
 
-    pil_image = Image.open(io.BytesIO(image_bytes))
-    result = audit_food_label(
-        image=pil_image,
-        health_profiles=health_profiles,
-        front_claim=front_claim,
-    )
-    return {"success": True, "data": result}
-  except HTTPException:
-    raise
-  except Exception as e:
-    raise HTTPException(status_code=500, detail=f"Audit failed: {str(e)}")
+    # ---- Clean inputs ----
+    if intent not in VALID_INTENTS:
+        intent = "pre_purchase"
+    health_profiles = health_profiles.strip()[:300]
+    front_claim = front_claim.strip()[:200]
+    diet_goal = diet_goal.strip()[:100] or "General Health"
+
+    # ---- Step 1: AI audit ----
+    try:
+        audit_result = await run_in_threadpool(
+            audit_food_label,
+            pil_image,
+            health_profiles,
+            front_claim,
+            diet_goal=diet_goal,
+            intent=intent,
+        )
+    except Exception:
+        logger.exception("AI audit failed")
+        raise HTTPException(status_code=502, detail="The AI analysis failed.")
+
+    # ---- Step 2: Smart swaps ----
+    smart_swaps = []
+    if not audit_result.get("is_product_optimal", False):
+        try:
+            smart_swaps = await run_in_threadpool(
+                find_smart_swaps,
+                audit_result.get("category", "Snacks / Chips"),
+                diet_goal,
+                audit_result.get("estimated_macros"),
+            )
+        except Exception:
+            logger.exception("Recommender failed")
+            smart_swaps = []
+
+    audit_result["smart_swaps"] = smart_swaps
+    audit_result["current_intent"] = intent
+    return audit_result
