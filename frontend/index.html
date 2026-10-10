@@ -32,35 +32,53 @@
           </div>
         </div>
         
-        <div class="upload-box" id="dropArea">
-          <input type="file" id="imageInput" accept="image/*" capture="environment" multiple hidden>
+        <!-- Action Options: Gallery Upload & Modern Live Camera -->
+        <div class="input-group" style="margin-bottom: 15px;">
+          <label class="section-label" style="margin-bottom: 8px; display: block;">Label Input Method:</label>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <!-- Gallery Upload Button -->
+            <button type="button" id="uploadGalleryBtn" class="primary-btn" style="flex: 1; min-width: 140px; background-color: #059669; padding: 12px; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+              📁 Choose File / Gallery
+            </button>
+            <input type="file" id="imageInput" accept="image/*" hidden>
+
+            <!-- Modern Live Camera Trigger Button -->
+            <button type="button" id="openCameraButton" class="primary-btn" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 12px; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+              📷 Open Live Camera
+            </button>
+          </div>
+        </div>
+
+        <!-- Selected Preview Box -->
+        <div class="upload-box" id="dropArea" style="text-align: center; border: 2px dashed #4b5563; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.02); cursor: pointer;">
           <div id="uploadPlaceholder">
-            <p class="upload-icon">📸</p>
-            <p><strong>Click to upload or snap label photo</strong></p>
-            <small>Front & Back panels (Select multiple)</small>
+            <p class="upload-icon" style="font-size: 1.8rem; margin-bottom: 5px;">🔍</p>
+            <p><strong>No label selected yet</strong></p>
+            <small style="color: #94a3b8;">Choose from gallery or capture live via camera</small>
           </div>
-          <img id="imagePreview" alt="Label Preview" class="preview-img hidden">
+          <img id="imagePreview" alt="Label Preview" class="preview-img hidden" style="max-height: 220px; margin: 0 auto; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
         </div>
 
-        <!-- Advanced Live Camera Trigger Button -->
-        <div class="input-group" style="margin-top: 10px;">
-          <button type="button" id="openCameraButton" class="primary-btn" style="background-color: #2563eb;">
-            📷 Open Live Camera
-          </button>
+        <!-- Modern Full-Width/Overlay Camera Viewfinder -->
+        <div id="cameraContainer" class="hidden" style="margin-bottom: 15px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; overflow: hidden; padding: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px;">
+            <span style="font-size: 0.9rem; font-weight: 600; color: #38bdf8;">🔴 Live Camera Scanner</span>
+            <button type="button" id="closeCameraButton" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">&times;</button>
+          </div>
+          
+          <div style="position: relative; width: 100%; background: #000; border-radius: 8px; overflow: hidden;">
+            <video id="videoElement" width="100%" autoplay playsinline style="display: block; max-height: 280px; object-fit: cover; margin: 0 auto;"></video>
+          </div>
 
-          <!-- Live Camera Viewfinder (Hidden by default) -->
-          <div id="cameraContainer" class="hidden" style="margin-top: 10px; text-align: center; background: #000; border-radius: 8px; overflow: hidden; padding: 10px;">
-            <video id="videoElement" width="100%" autoplay playsinline style="max-height: 250px; object-fit: contain; border-radius: 4px;"></video>
-            <button type="button" id="snapButton" class="primary-btn" style="background-color: #dc2626; margin-top: 8px;">
-              📸 Take Snapshot
-            </button>
-            <button type="button" id="closeCameraButton" class="primary-btn" style="background-color: #4b5563; margin-top: 4px; font-size: 0.85rem; padding: 6px;">
-              Close Camera
+          <div style="text-align: center; margin-top: 12px;">
+            <button type="button" id="snapButton" style="background-color: #ef4444; color: white; border: none; padding: 10px 24px; border-radius: 30px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(239,68,68,0.4);">
+              📸 Capture Snapshot
             </button>
           </div>
-          <!-- Hidden canvas for capturing frame -->
-          <canvas id="canvasElement" style="display: none;"></canvas>
         </div>
+
+        <!-- Hidden canvas for capturing frame -->
+        <canvas id="canvasElement" style="display: none;"></canvas>
 
         <!-- Diet Goal Selector Update -->
         <div class="input-group">

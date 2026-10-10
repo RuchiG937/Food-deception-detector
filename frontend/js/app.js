@@ -12,6 +12,7 @@ const MAX_FILE_SIZE_MB = 8;
 // Base UI Elements
 const dropArea = document.getElementById("dropArea");
 const imageInput = document.getElementById("imageInput");
+const uploadGalleryBtn = document.getElementById("uploadGalleryBtn");
 const imagePreview = document.getElementById("imagePreview");
 const uploadPlaceholder = document.getElementById("uploadPlaceholder");
 const analyzeBtn = document.getElementById("analyzeBtn");
@@ -76,7 +77,14 @@ function setLoaderText(text) {
 // 3. UI Event Listeners & Logic
 // ==========================================
 
-// Handle Image Upload
+// Gallery Upload Button Click Handler
+if (uploadGalleryBtn) {
+  uploadGalleryBtn.addEventListener("click", () => {
+    imageInput.click();
+  });
+}
+
+// Handle DropArea / Preview Box Click
 if (dropArea) {
   dropArea.addEventListener("click", () => imageInput.click());
 }
@@ -86,7 +94,6 @@ if (imageInput) {
     if (e.target.files.length > 0) {
       handleFile(e.target.files[0]);
     }
-    // Allows choosing the same file again later
     e.target.value = "";
   });
 }
@@ -305,7 +312,7 @@ analyzeBtn.addEventListener("click", async () => {
 });
 
 // ==========================================
-// 5. Output Rendering Engine
+// 5. Output Rendering Engine (Unified with Offline Guide Support)
 // ==========================================
 function renderOutput(data) {
   resultContent.innerHTML = "";
@@ -380,15 +387,20 @@ function renderOutput(data) {
     swapsHtml = `
       <div style="margin-top:1.2rem; background:rgba(16,185,129,0.1); border:1px solid #10b981; border-radius:10px; padding:1.2rem;">
         <h4 style="margin:0 0 0.5rem 0; color:#34d399;">🏆 Great Choice! This Product is Optimal</h4>
-        <p style="margin:0.2rem 0; font-size:0.9rem; color:#e2e8f0;">This product perfectly aligns with your health profiles and diet goals. No alternative needed. Check live prices below:</p>
+        <p style="margin:0.2rem 0; font-size:0.9rem; color:#e2e8f0;">This product perfectly aligns with your health profiles and diet goals.</p>
+        
+        <div style="margin-top:0.8rem;">
+          <button type="button" class="btn-action btn-offline"
+            data-name="${esc(productName)}"
+            data-price="Market Standard"
+            data-taste="Clean & Optimal">
+            🏪 Offline Store Guide
+          </button>
+        </div>
 
-        <div class="swap-actions" style="margin-top:1rem;">
-          <a href="${esc(blinkitUrl)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-blinkit">
-            ⚡ Buy on Blinkit
-          </a>
-          <a href="${esc(zeptoUrl)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-zepto">
-            ⚡ Buy on Zepto
-          </a>
+        <div class="swap-actions" style="margin-top:0.8rem;">
+          <a href="${esc(blinkitUrl)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-blinkit">⚡ Blinkit</a>
+          <a href="${esc(zeptoUrl)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-zepto">⚡ Zepto</a>
         </div>
       </div>
     `;
@@ -400,28 +412,24 @@ function renderOutput(data) {
       const zeptoUrl = `https://www.zeptonow.com/search?q=${encodeURIComponent(name)}`;
 
       return `
-        <div class="swap-card">
+        <div class="swap-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); padding:1rem; border-radius:8px; margin-bottom:0.8rem;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span class="swap-badge">⭐ ${num(item.match_rating, 0, 0, 100)}% ML Match</span>
+            <span class="swap-badge">⭐ ${num(item.match_rating, 0, 0, 100)}% Match</span>
             <span style="font-size:0.8rem; color:#94a3b8;">${esc(item.approx_price || "")}</span>
           </div>
-          <h4 style="margin:0.2rem 0; color:#fff;">${esc(name)}</h4>
+          <h4 style="margin:0.3rem 0; color:#fff; font-size:1.05rem;">${esc(name)}</h4>
           <p style="margin:0.2rem 0; font-size:0.8rem; color:#a7f3d0;"><strong>Taste:</strong> ${esc(item.taste_profile || "")}</p>
           <p style="margin:0.3rem 0 0 0; font-size:0.85rem; color:#e2e8f0;">${esc(item.why || "")}</p>
 
-          <div class="swap-actions">
+          <div class="swap-actions" style="display:flex; gap:0.5rem; margin-top:0.8rem; flex-wrap:wrap;">
             <button type="button" class="btn-action btn-offline"
               data-name="${esc(name)}"
               data-price="${esc(item.approx_price || "")}"
               data-taste="${esc(item.taste_profile || "")}">
               🏪 Offline Store Guide
             </button>
-            <a href="${esc(blinkitUrl)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-blinkit">
-              ⚡ Blinkit
-            </a>
-            <a href="${esc(zeptoUrl)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-zepto">
-              ⚡ Zepto
-            </a>
+            <a href="${esc(blinkitUrl)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-blinkit" style="padding:0.4rem 0.8rem; font-size:0.85rem;">⚡ Blinkit</a>
+            <a href="${esc(zeptoUrl)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-zepto" style="padding:0.4rem 0.8rem; font-size:0.85rem;">⚡ Zepto</a>
           </div>
         </div>
       `;
